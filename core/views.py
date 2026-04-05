@@ -10,7 +10,7 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_GET, require_http_methods, require_safe
 
 from .auth import api_error, require_auth
 from .models import AdminCredential, AdminSession, AttendanceRecord, Employee
@@ -55,7 +55,7 @@ def _serialize_attendance(record: AttendanceRecord):
     }
 
 
-@require_GET
+@require_safe
 def health(request):
     return api_ok(
         "BSZone backend is healthy",
