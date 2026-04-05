@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import shutil
 from urllib.parse import urlsplit
 
 import dj_database_url
@@ -143,7 +144,23 @@ TEMPLATES = [
 WSGI_APPLICATION = "bszone_backend.wsgi.application"
 ASGI_APPLICATION = "bszone_backend.asgi.application"
 
-database_url = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+
+def default_database_url() -> str:
+    bundled_sqlite_path = BASE_DIR / "db.sqlite3"
+
+    # Vercel functions have a read-only deployment filesystem but a writable /tmp.
+    # If DATABASE_URL is not configured yet, copy the bundled demo sqlite database
+    # into /tmp so login and demo writes can still work during deployment previews.
+    if str(BASE_DIR).startswith("/var/task") and Path("/tmp").exists():
+        runtime_sqlite_path = Path("/tmp") / bundled_sqlite_path.name
+        if bundled_sqlite_path.exists() and not runtime_sqlite_path.exists():
+            shutil.copyfile(bundled_sqlite_path, runtime_sqlite_path)
+        return f"sqlite:///{runtime_sqlite_path}"
+
+    return f"sqlite:///{bundled_sqlite_path}"
+
+
+database_url = os.getenv("DATABASE_URL", default_database_url())
 database_config = dj_database_url.parse(database_url, conn_max_age=600)
 if database_config.get("ENGINE") != "django.db.backends.sqlite3" and not DEBUG:
     database_config.setdefault("OPTIONS", {})

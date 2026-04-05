@@ -43,3 +43,5 @@ DJANGO_ALLOWED_HOSTS=source-backend-django.vercel.app
 `DJANGO_ALLOWED_HOSTS` must contain host names only. Do not include `https://` or a trailing `/`.
 
 The backend also auto-adds Vercel system hostnames such as `VERCEL_URL` and `VERCEL_PROJECT_PRODUCTION_URL` when they are available at runtime.
+
+If `DATABASE_URL` is not set on Vercel yet, the app now falls back to a writable `/tmp/db.sqlite3` copy so the demo can still log in. Railway Postgres is still the right long-term setup for persistent data.
