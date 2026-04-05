@@ -8,24 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-configured_allowed_hosts = [
-    host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()
-]
-
-if "*" in configured_allowed_hosts:
-    ALLOWED_HOSTS = ["*"]
-else:
-    ALLOWED_HOSTS = list(
-        dict.fromkeys(
-            configured_allowed_hosts
-            + [
-                "localhost",
-                "127.0.0.1",
-                ".up.railway.app",
-                ".railway.internal",
-            ]
-        )
-    )
+ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", os.getenv("FRONTEND_URL", "http://localhost:3000")).split(",")
