@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from urllib.parse import urlsplit
 
 import dj_database_url
 
@@ -29,15 +30,75 @@ load_dotenv(BASE_DIR / ".env")
 def csv_env(name: str, default: str) -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
 
+
+def unique(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    items: list[str] = []
+    for value in values:
+        if value and value not in seen:
+            seen.add(value)
+            items.append(value)
+    return items
+
+
+def normalize_origin(value: str) -> str:
+    value = value.strip()
+    if not value:
+        return ""
+
+    parsed = urlsplit(value)
+    if parsed.scheme and parsed.netloc:
+        return f"{parsed.scheme}://{parsed.netloc}"
+
+    return value.rstrip("/")
+
+
+def normalize_host(value: str) -> str:
+    value = value.strip()
+    if not value:
+        return ""
+    if value == "*":
+        return value
+
+    parsed = urlsplit(value)
+    if parsed.hostname:
+        return parsed.hostname
+
+    return value.rstrip("/").split("/")[0].split(":")[0]
+
 SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = csv_env("DJANGO_ALLOWED_HOSTS", "*")
-CSRF_TRUSTED_ORIGINS = csv_env(
-    "DJANGO_CSRF_TRUSTED_ORIGINS",
-    os.getenv("FRONTEND_URL", "http://localhost:3000"),
+frontend_origins = unique(
+    [
+        normalize_origin(item)
+        for item in csv_env("FRONTEND_URL", "http://localhost:3000")
+    ]
 )
-CORS_ALLOWED_ORIGINS = csv_env("FRONTEND_URL", "http://localhost:3000")
+
+vercel_hosts = unique(
+    [
+        normalize_host(os.getenv("VERCEL_URL", "")),
+        normalize_host(os.getenv("VERCEL_BRANCH_URL", "")),
+        normalize_host(os.getenv("VERCEL_PROJECT_PRODUCTION_URL", "")),
+    ]
+)
+
+allowed_hosts = unique(
+    [normalize_host(item) for item in csv_env("DJANGO_ALLOWED_HOSTS", "")]
+    + vercel_hosts
+)
+ALLOWED_HOSTS = allowed_hosts or ["*"]
+CSRF_TRUSTED_ORIGINS = unique(
+    [
+        normalize_origin(item)
+        for item in csv_env(
+            "DJANGO_CSRF_TRUSTED_ORIGINS",
+            ",".join(frontend_origins) or "http://localhost:3000",
+        )
+    ]
+)
+CORS_ALLOWED_ORIGINS = frontend_origins
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -98,6 +159,8 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
