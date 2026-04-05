@@ -63,6 +63,44 @@ def _serialize_attendance(record: AttendanceRecord):
     }
 
 
+def _parse_iso_date(value: str, field_name: str):
+    try:
+        return date.fromisoformat(str(value).strip())
+    except ValueError:
+        raise ValueError(f"{field_name} must be a valid date in YYYY-MM-DD format")
+
+
+def _validate_employee_payload(payload):
+    required_fields = [
+        "employeeCode",
+        "fullName",
+        "department",
+        "designation",
+        "email",
+        "phoneNumber",
+        "joinedOn",
+    ]
+
+    for field in required_fields:
+        if not str(payload.get(field, "")).strip():
+            raise ValueError(f"{field} is required")
+
+    try:
+        validate_email(payload["email"])
+    except ValidationError as error:
+        raise ValueError("A valid email is required") from error
+
+    return {
+        "employee_code": str(payload["employeeCode"]).strip(),
+        "full_name": str(payload["fullName"]).strip(),
+        "department": str(payload["department"]).strip(),
+        "designation": str(payload["designation"]).strip(),
+        "email": str(payload["email"]).strip(),
+        "phone_number": str(payload["phoneNumber"]).strip(),
+        "joined_on": _parse_iso_date(payload["joinedOn"], "joinedOn"),
+    }
+
+
 @require_safe
 def health(request):
     return api_ok(
@@ -142,46 +180,48 @@ def employees(request):
 
     try:
         payload = _parse_json(request)
+        employee_data = _validate_employee_payload(payload)
     except ValueError as error:
         return api_error(str(error), 400)
 
-    required_fields = [
-        "employeeCode",
-        "fullName",
-        "department",
-        "designation",
-        "email",
-        "phoneNumber",
-        "joinedOn",
-    ]
-    for field in required_fields:
-        if not str(payload.get(field, "")).strip():
-            return api_error(f"{field} is required", 400)
-
     try:
-        validate_email(payload["email"])
-    except ValidationError:
-        return api_error("A valid email is required", 400)
-
-    try:
-        joined_on = date.fromisoformat(str(payload["joinedOn"]).strip())
-    except ValueError:
-        return api_error("joinedOn must be a valid date in YYYY-MM-DD format", 400)
-
-    try:
-        employee = Employee.objects.create(
-            employee_code=str(payload["employeeCode"]).strip(),
-            full_name=str(payload["fullName"]).strip(),
-            department=str(payload["department"]).strip(),
-            designation=str(payload["designation"]).strip(),
-            email=str(payload["email"]).strip(),
-            phone_number=str(payload["phoneNumber"]).strip(),
-            joined_on=joined_on,
-        )
+        employee = Employee.objects.create(**employee_data)
     except IntegrityError:
         return api_error("Employee code or email already exists", 409)
 
     return api_ok("Employee created successfully", _serialize_employee(employee), status=201)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "PUT", "DELETE"])
+@require_auth
+def employee_detail(request, employee_id: int):
+    employee = Employee.objects.filter(id=employee_id).first()
+    if employee is None:
+        return api_error("Employee was not found", 404)
+
+    if request.method == "GET":
+        return api_ok("Employee fetched", _serialize_employee(employee))
+
+    if request.method == "DELETE":
+        employee.delete()
+        return api_ok("Employee deleted successfully", {"id": str(employee_id)})
+
+    try:
+        payload = _parse_json(request)
+        employee_data = _validate_employee_payload(payload)
+    except ValueError as error:
+        return api_error(str(error), 400)
+
+    for field, value in employee_data.items():
+        setattr(employee, field, value)
+
+    try:
+        employee.save()
+    except IntegrityError:
+        return api_error("Employee code or email already exists", 409)
+
+    return api_ok("Employee updated successfully", _serialize_employee(employee))
 
 
 @require_GET
@@ -232,9 +272,9 @@ def mark_attendance(request):
         return api_error("Selected employee was not found", 404)
 
     try:
-        attendance_date = date.fromisoformat(str(payload.get("date", "")).strip())
-    except ValueError:
-        return api_error("date must be a valid date in YYYY-MM-DD format", 400)
+        attendance_date = _parse_iso_date(payload.get("date", ""), "date")
+    except ValueError as error:
+        return api_error(str(error), 400)
 
     try:
         record = AttendanceRecord.objects.create(
