@@ -1,12 +1,13 @@
 from rest_framework import permissions, viewsets
 
+from common.api import SafeModelViewSet
 from common.permissions import IsAdminOrSupervisor, IsAuthenticatedWorkerOrAbove
 
 from .models import WorkLog
 from .serializers import WorkLogSerializer
 
 
-class WorkLogViewSet(viewsets.ModelViewSet):
+class WorkLogViewSet(SafeModelViewSet):
     queryset = WorkLog.objects.select_related("land", "supervisor", "vehicle").prefetch_related(
         "assignments__employee"
     ).all().order_by("-work_date", "-created_at")

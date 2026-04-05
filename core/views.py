@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods, require_safe
 
-from .auth import api_error, require_auth
+from .auth import api_error, require_auth, safe_api_endpoint
 from .models import AdminCredential, AdminSession, AttendanceRecord, Employee
 from .utils import api_ok
 
@@ -101,6 +101,7 @@ def _validate_employee_payload(payload):
     }
 
 
+@safe_api_endpoint
 @require_safe
 def health(request):
     return api_ok(
@@ -111,11 +112,13 @@ def health(request):
     )
 
 
+@safe_api_endpoint
 @require_GET
 def api_index(request):
     return api_ok("BSZone API ready", {"modules": ["auth", "employees", "attendance"]})
 
 
+@safe_api_endpoint
 @csrf_exempt
 @require_http_methods(["POST"])
 def login(request):
@@ -153,6 +156,7 @@ def login(request):
     )
 
 
+@safe_api_endpoint
 @require_GET
 @require_auth
 def me(request):
@@ -170,6 +174,7 @@ def me(request):
     )
 
 
+@safe_api_endpoint
 @require_http_methods(["GET", "POST"])
 @csrf_exempt
 @require_auth
@@ -192,6 +197,7 @@ def employees(request):
     return api_ok("Employee created successfully", _serialize_employee(employee), status=201)
 
 
+@safe_api_endpoint
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
 @require_auth
@@ -224,6 +230,7 @@ def employee_detail(request, employee_id: int):
     return api_ok("Employee updated successfully", _serialize_employee(employee))
 
 
+@safe_api_endpoint
 @require_GET
 @require_auth
 def attendance_summary(request):
@@ -247,6 +254,7 @@ def attendance_summary(request):
     )
 
 
+@safe_api_endpoint
 @require_GET
 @require_auth
 def attendance_records(request):
@@ -254,6 +262,7 @@ def attendance_records(request):
     return api_ok("Attendance records fetched", [_serialize_attendance(record) for record in records])
 
 
+@safe_api_endpoint
 @csrf_exempt
 @require_http_methods(["POST"])
 @require_auth

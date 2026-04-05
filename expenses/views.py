@@ -1,12 +1,11 @@
-from rest_framework import viewsets
-
+from common.api import SafeModelViewSet
 from common.permissions import IsAdminOrSupervisorOrReadOnly
 
 from .models import Expense
 from .serializers import ExpenseSerializer
 
 
-class ExpenseViewSet(viewsets.ModelViewSet):
+class ExpenseViewSet(SafeModelViewSet):
     queryset = Expense.objects.select_related("land", "employee", "vehicle", "worklog").all().order_by(
         "-expense_date",
         "-created_at",

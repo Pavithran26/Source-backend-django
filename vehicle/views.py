@@ -1,12 +1,11 @@
-from rest_framework import viewsets
-
+from common.api import SafeModelViewSet
 from common.permissions import IsAdminOrSupervisorOrReadOnly
 
 from .models import Vehicle, VehicleUsageLog
 from .serializers import VehicleSerializer, VehicleUsageLogSerializer
 
 
-class VehicleViewSet(viewsets.ModelViewSet):
+class VehicleViewSet(SafeModelViewSet):
     queryset = Vehicle.objects.all().order_by("registration_number")
     serializer_class = VehicleSerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]
@@ -15,7 +14,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
     ordering_fields = ["registration_number", "vehicle_type", "capacity", "created_at"]
 
 
-class VehicleUsageLogViewSet(viewsets.ModelViewSet):
+class VehicleUsageLogViewSet(SafeModelViewSet):
     queryset = VehicleUsageLog.objects.select_related("vehicle").all().order_by("-usage_date", "-created_at")
     serializer_class = VehicleUsageLogSerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]

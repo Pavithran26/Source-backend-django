@@ -1,12 +1,11 @@
-from rest_framework import viewsets
-
+from common.api import SafeModelViewSet
 from common.permissions import IsAdminOrSupervisorOrReadOnly
 
 from .models import Employee
 from .serializers import EmployeeSerializer
 
 
-class EmployeeViewSet(viewsets.ModelViewSet):
+class EmployeeViewSet(SafeModelViewSet):
     queryset = Employee.objects.all().order_by("full_name")
     serializer_class = EmployeeSerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]

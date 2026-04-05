@@ -1,12 +1,11 @@
-from rest_framework import viewsets
-
+from common.api import SafeModelViewSet
 from common.permissions import IsAdminOrSupervisorOrReadOnly
 
 from .models import Land, LandOwner
 from .serializers import LandOwnerSerializer, LandSerializer
 
 
-class LandOwnerViewSet(viewsets.ModelViewSet):
+class LandOwnerViewSet(SafeModelViewSet):
     queryset = LandOwner.objects.all().order_by("name")
     serializer_class = LandOwnerSerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]
@@ -15,7 +14,7 @@ class LandOwnerViewSet(viewsets.ModelViewSet):
     ordering_fields = ["name", "village", "created_at"]
 
 
-class LandViewSet(viewsets.ModelViewSet):
+class LandViewSet(SafeModelViewSet):
     queryset = Land.objects.select_related("owner").all().order_by("name")
     serializer_class = LandSerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]

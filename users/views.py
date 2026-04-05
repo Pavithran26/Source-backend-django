@@ -2,9 +2,9 @@ from django.contrib.auth.models import User
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from common.api import SafeAPIView, SafeGenericViewSet
 from common.permissions import IsAdmin
 
 from .serializers import UserSerializer, WorkspaceTokenObtainPairSerializer
@@ -15,14 +15,20 @@ class WorkspaceTokenObtainPairView(TokenObtainPairView):
     serializer_class = WorkspaceTokenObtainPairSerializer
 
 
-class MeAPIView(APIView):
+class MeAPIView(SafeAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response(build_user_payload(request.user))
 
 
-class UserViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class UserViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    SafeGenericViewSet,
+):
     queryset = User.objects.select_related("profile").order_by("username")
     serializer_class = UserSerializer
     permission_classes = [IsAdmin]
