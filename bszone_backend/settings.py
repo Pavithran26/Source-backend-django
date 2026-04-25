@@ -136,7 +136,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "bszone_backend.urls"
+ROOT_URLCONF = "srk_backend.urls"
 
 TEMPLATES = [
     {
@@ -153,8 +153,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "bszone_backend.wsgi.application"
-ASGI_APPLICATION = "bszone_backend.asgi.application"
+WSGI_APPLICATION = "srk_backend.wsgi.application"
+ASGI_APPLICATION = "srk_backend.asgi.application"
 
 
 def default_database_url() -> str:
