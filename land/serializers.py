@@ -29,7 +29,6 @@ class LandSerializer(serializers.ModelSerializer):
             "lease_start_date",
             "lease_end_date",
             "lease_amount",
-            "agreed_emi_amount",
             "tree_count",
             "lease_notes",
             "is_active",

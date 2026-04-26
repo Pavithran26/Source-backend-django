@@ -33,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
     )
     password = serializers.CharField(write_only=True, required=False, allow_blank=False, min_length=8)
     full_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    profile_image = serializers.ImageField(source="profile.profile_image", required=False, allow_null=True)
 
     class Meta:
         model = User
@@ -49,6 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
             "phone_number",
             "designation",
             "preferred_language",
+            "profile_image",
         ]
         read_only_fields = ["id"]
 
@@ -98,5 +100,35 @@ class UserSerializer(serializers.ModelSerializer):
         for field, value in profile_data.items():
             setattr(profile, field, value)
         profile.save()
+
+        return instance
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(write_only=True, required=False, min_length=8)
+    profile_image = serializers.ImageField(source="profile.profile_image", required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "password", "profile_image"]
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop("profile", {})
+        password = validated_data.pop("password", None)
+
+        if "username" in validated_data:
+            instance.username = validated_data["username"]
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+
+        if profile_data:
+            profile = instance.profile
+            for field, value in profile_data.items():
+                setattr(profile, field, value)
+            profile.save()
 
         return instance

@@ -1,47 +1,70 @@
-# Source Backend Django
+# Source ERP - Backend (Django)
 
-## Environment
+The backend service for the Source Coconut ERP, built with Python, Django, and Django Rest Framework.
 
-Create `backend-django/.env` for local backend settings.
+## 🚀 Technology Stack
+- **Framework**: Django 5.1
+- **API**: Django Rest Framework (DRF)
+- **Database**: SQLite (Local), PostgreSQL (Production/Railway)
+- **Authentication**: JWT (SimpleJWT)
+- **Deployment**: Railway / Vercel
 
-Current frontend origin:
+## 📦 Core Modules
+- **Users**: Custom UserProfile, roles (Admin, Supervisor, Worker), and Profile Image support.
+- **Land**: Land owner management and Land Lease (Gudhagai) tracking with EMI/Ledger logic.
+- **Employee**: Field staff and worker master records with wage tracking.
+- **Vehicle**: Registration and transport tracking.
+- **Worklog**: Daily harvesting logs linking lands, supervisors, and workers.
+- **Sales**: Sales ledger linked to buyers, lands, and worklogs.
+- **Expenses**: General operational expense tracking.
 
-```env
-FRONTEND_URL=https://source-frontend-omega.vercel.app
-DJANGO_CSRF_TRUSTED_ORIGINS=https://source-frontend-omega.vercel.app
-```
+## 🛠️ Local Setup
 
-The backend now loads `backend-django/.env` automatically.
+1. **Clone and Enter Directory**:
+   ```bash
+   cd Source-backend-django
+   ```
 
-## Railway Postgres
+2. **Create Virtual Environment**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   ```
 
-The backend already uses `DATABASE_URL`, so Railway Postgres works without extra database code changes.
+3. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Set these variables in your Railway backend service:
+4. **Environment Variables**:
+   Create a `.env` file based on `.env.example`:
+   ```env
+   DEBUG=True
+   SECRET_KEY=your-secret-key
+   FRONTEND_URL=http://localhost:3000
+   ```
 
-```env
-DATABASE_URL=${{Postgres.DATABASE_URL}}
-FRONTEND_URL=https://source-frontend-omega.vercel.app
-DJANGO_CSRF_TRUSTED_ORIGINS=https://source-frontend-omega.vercel.app
-```
+5. **Migrations & Superuser**:
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
 
-If your Railway database service has a different name, replace `Postgres` with that exact service name.
+6. **Run Server**:
+   ```bash
+   python manage.py runserver
+   ```
 
-For local development, you can leave `DATABASE_URL` unset and Django will fall back to `db.sqlite3`.
+## ☁️ Deployment
 
-## Vercel notes
+### Railway (Recommended)
+This repo includes a `railway.toml`. When deploying to Railway, ensure you:
+1. Link a PostgreSQL service.
+2. Set `DATABASE_URL` to `${{Postgres.DATABASE_URL}}`.
+3. Set `DJANGO_ALLOWED_HOSTS` to your Railway domain.
 
-For Vercel deployments:
+### Vercel
+The project is configured for Vercel using `bszone_backend/vercel_app.py`. Note that SQLite data is not persistent on Vercel; use an external Postgres for production data.
 
-```env
-DEBUG=False
-FRONTEND_URL=https://source-frontend-omega.vercel.app
-DJANGO_CSRF_TRUSTED_ORIGINS=https://source-frontend-omega.vercel.app
-DJANGO_ALLOWED_HOSTS=source-backend-django.vercel.app
-```
-
-`DJANGO_ALLOWED_HOSTS` must contain host names only. Do not include `https://` or a trailing `/`.
-
-The backend also auto-adds Vercel system hostnames such as `VERCEL_URL` and `VERCEL_PROJECT_PRODUCTION_URL` when they are available at runtime.
-
-If `DATABASE_URL` is not set on Vercel yet, the app now falls back to a writable `/tmp/db.sqlite3` copy so the demo can still log in. Railway Postgres is still the right long-term setup for persistent data.
+## 🛡️ License
+Private Repository.

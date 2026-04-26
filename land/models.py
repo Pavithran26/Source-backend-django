@@ -24,7 +24,6 @@ class Land(BaseModel):
     lease_start_date = models.DateField()
     lease_end_date = models.DateField()
     lease_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    agreed_emi_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Amount to be paid per installment")
     tree_count = models.PositiveIntegerField(default=0)
     lease_notes = models.TextField(blank=True)
     is_active = models.BooleanField(default=True, db_index=True)

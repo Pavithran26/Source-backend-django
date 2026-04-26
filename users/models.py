@@ -22,6 +22,7 @@ class UserProfile(BaseModel):
     phone_number = models.CharField(max_length=30, blank=True)
     designation = models.CharField(max_length=120, blank=True)
     preferred_language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default="en")
+    profile_image = models.ImageField(upload_to="profiles/", blank=True, null=True)
 
     class Meta:
         ordering = ["user__username"]
