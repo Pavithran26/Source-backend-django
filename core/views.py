@@ -105,7 +105,7 @@ def _validate_employee_payload(payload):
 @require_safe
 def health(request):
     return api_ok(
-        "BSZone backend is healthy",
+        "srk backend is healthy",
         {
             "uptime": 0,
         },
@@ -115,7 +115,7 @@ def health(request):
 @safe_api_endpoint
 @require_GET
 def api_index(request):
-    return api_ok("BSZone API ready", {"modules": ["auth", "employees", "attendance"]})
+    return api_ok("srk API ready", {"modules": ["auth", "employees", "attendance"]})
 
 
 @safe_api_endpoint

@@ -14,4 +14,5 @@ def build_user_payload(user: User) -> dict:
         "phoneNumber": getattr(profile, "phone_number", ""),
         "designation": getattr(profile, "designation", ""),
         "preferredLanguage": getattr(profile, "preferred_language", "en"),
+        "profileImage": profile.profile_image.url if profile and profile.profile_image else None,
     }

@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from common.views import DashboardSummaryAPIView, EmployeeWorkReportAPIView, LandProductionReportAPIView, ProfitLossReportAPIView
 from employee.views import EmployeeViewSet
 from expenses.views import ExpenseViewSet
-from land.views import LandOwnerViewSet, LandViewSet
+from land.views import LandOwnerViewSet, LandViewSet, LandLeasePaymentViewSet
 from sales.views import BuyerViewSet, SalesEntryViewSet
 from users.views import MeAPIView, UserViewSet, WorkspaceTokenObtainPairView
 from vehicle.views import VehicleUsageLogViewSet, VehicleViewSet
@@ -15,6 +15,7 @@ router = DefaultRouter(trailing_slash=False)
 router.register("users", UserViewSet, basename="user")
 router.register("land-owners", LandOwnerViewSet, basename="land-owner")
 router.register("lands", LandViewSet, basename="land")
+router.register("land-payments", LandLeasePaymentViewSet, basename="land-payment")
 router.register("employees", EmployeeViewSet, basename="employee")
 router.register("vehicles", VehicleViewSet, basename="vehicle")
 router.register("vehicle-usage", VehicleUsageLogViewSet, basename="vehicle-usage")

@@ -99,8 +99,9 @@ CSRF_TRUSTED_ORIGINS = unique(
             ",".join(frontend_origins) or "http://localhost:3000",
         )
     ]
+    + ["http://localhost:3000"]
 )
-CORS_ALLOWED_ORIGINS = frontend_origins
+CORS_ALLOWED_ORIGINS = unique(frontend_origins + ["http://localhost:3000"])
 CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
@@ -222,3 +223,4 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+

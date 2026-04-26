@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from common.api import SafeAPIView, SafeGenericViewSet
 from common.permissions import IsAdmin
 
-from .serializers import UserSerializer, WorkspaceTokenObtainPairSerializer
+from .serializers import UserSerializer, WorkspaceTokenObtainPairSerializer, ProfileUpdateSerializer
 from .services import build_user_payload
 
 
@@ -19,6 +19,12 @@ class MeAPIView(SafeAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        return Response(build_user_payload(request.user))
+
+    def patch(self, request):
+        serializer = ProfileUpdateSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(build_user_payload(request.user))
 
 

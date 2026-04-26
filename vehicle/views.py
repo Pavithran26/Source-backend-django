@@ -9,7 +9,11 @@ class VehicleViewSet(SafeModelViewSet):
     queryset = Vehicle.objects.all().order_by("registration_number")
     serializer_class = VehicleSerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]
-    filterset_fields = ["vehicle_type", "is_active"]
+    filterset_fields = {
+        "vehicle_type": ["exact"],
+        "is_active": ["exact"],
+        "created_at": ["exact", "gte", "lte"],
+    }
     search_fields = ["registration_number", "vehicle_type", "driver_name", "driver_phone"]
     ordering_fields = ["registration_number", "vehicle_type", "capacity", "created_at"]
 

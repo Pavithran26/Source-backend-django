@@ -12,7 +12,12 @@ class WorkLogViewSet(SafeModelViewSet):
         "assignments__employee"
     ).all().order_by("-work_date", "-created_at")
     serializer_class = WorkLogSerializer
-    filterset_fields = ["land", "supervisor", "vehicle", "work_date"]
+    filterset_fields = {
+        "land": ["exact"],
+        "supervisor": ["exact"],
+        "vehicle": ["exact"],
+        "work_date": ["exact", "gte", "lte"],
+    }
     search_fields = ["land__name", "land__village", "notes", "supervisor__full_name"]
     ordering_fields = ["work_date", "coconut_count", "bag_count", "created_at"]
 

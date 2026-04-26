@@ -9,7 +9,7 @@ django_application = get_wsgi_application()
 
 def application(environ, start_response):
     if environ.get("PATH_INFO") == "/health":
-        body = b'{"success":true,"message":"BSZone backend is healthy","data":{"uptime":0}}'
+        body = b'{"success":true,"message":"srk backend is healthy","data":{"uptime":0}}'
         headers = [
             ("Content-Type", "application/json"),
             ("Content-Length", str(len(body))),

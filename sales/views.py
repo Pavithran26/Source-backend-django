@@ -18,6 +18,10 @@ class SalesEntryViewSet(SafeModelViewSet):
     queryset = SalesEntry.objects.select_related("buyer", "land", "worklog").all().order_by("-sale_date", "-created_at")
     serializer_class = SalesEntrySerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]
-    filterset_fields = ["buyer", "land", "sale_date"]
+    filterset_fields = {
+        "buyer": ["exact"],
+        "land": ["exact"],
+        "sale_date": ["exact", "gte", "lte"],
+    }
     search_fields = ["buyer__name", "land__name", "notes"]
     ordering_fields = ["sale_date", "quantity", "unit_price", "created_at"]

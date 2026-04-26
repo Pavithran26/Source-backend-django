@@ -12,6 +12,13 @@ class ExpenseViewSet(SafeModelViewSet):
     )
     serializer_class = ExpenseSerializer
     permission_classes = [IsAdminOrSupervisorOrReadOnly]
-    filterset_fields = ["expense_type", "expense_date", "land", "employee", "vehicle", "worklog"]
+    filterset_fields = {
+        "expense_type": ["exact"],
+        "land": ["exact"],
+        "employee": ["exact"],
+        "vehicle": ["exact"],
+        "worklog": ["exact"],
+        "expense_date": ["exact", "gte", "lte"],
+    }
     search_fields = ["notes", "land__name", "employee__full_name", "vehicle__registration_number"]
     ordering_fields = ["expense_date", "amount", "created_at"]
