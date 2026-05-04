@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "sales",
     "expenses",
     "core",
+    "inventory",
 ]
 
 MIDDLEWARE = [

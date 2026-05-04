@@ -29,6 +29,16 @@ class WorkLog(BaseModel):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     photo_proof = models.ImageField(upload_to="worklog-proofs/", blank=True, null=True)
     notes = models.TextField(blank=True)
+    
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    LOAD_CHOICES = (
+        ('lease load', 'Lease Load'),
+        ('Direct Load', 'Direct Load'),
+    )
+    load_type = models.CharField(max_length=20, choices=LOAD_CHOICES, null=True, blank=True)
+    transport_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    location = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         ordering = ["-work_date", "-created_at"]
