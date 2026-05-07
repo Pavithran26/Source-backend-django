@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
 from worklog.serializers import WorkLogSerializer
+from worklog.models import WorkLog
 from vehicle.serializers import VehicleSerializer
+from vehicle.models import Vehicle
 from .models import Store, GRN
 
 
