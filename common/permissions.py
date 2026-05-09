@@ -7,11 +7,11 @@ ROLE_WORKER = "worker"
 
 
 def get_user_role(user) -> str:
+    if getattr(user, "is_superuser", False):
+        return ROLE_ADMIN
     profile = getattr(user, "profile", None)
     if profile and profile.role:
         return profile.role
-    if getattr(user, "is_superuser", False):
-        return ROLE_ADMIN
     return ROLE_WORKER
 
 
