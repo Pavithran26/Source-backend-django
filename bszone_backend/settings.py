@@ -101,7 +101,11 @@ CSRF_TRUSTED_ORIGINS = unique(
             ",".join(frontend_origins) or "http://localhost:3000",
         )
     ]
-    + ["http://localhost:3000"]
+    + [
+        "http://localhost:3000",
+        "https://*.vercel.app",
+        "https://source-backend-django.vercel.app"
+    ]
 )
 CORS_ALLOWED_ORIGINS = unique(frontend_origins + ["http://localhost:3000"])
 CORS_ALLOW_ALL_ORIGINS = True
