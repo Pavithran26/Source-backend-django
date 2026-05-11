@@ -9,6 +9,8 @@ import dj_database_url
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+# Vercel imports this module during build: do not emit print() or WARNING-level logs here (probe expects JSON-only stdout).
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
 
@@ -244,13 +246,13 @@ if FIREBASE_KEY_PATH.exists():
             firebase_admin.initialize_app(cred)
         # Global Firestore client for backward compatibility
         db = firestore.client()
-        logger.info("Firebase initialized.")
+        # Do not log info/warning here: Vercel's build imports settings and expects clean
+        # stdout (no lines starting with WARNING:, etc.) when probing Django configuration.
+        logger.debug("Firebase initialized.")
     except Exception as e:
-        logger.warning("Error initializing Firebase: %s", e)
+        logger.debug("Error initializing Firebase: %s", e)
         db = None
 else:
-    logger.warning(
-        "serviceAccountKey.json not found; Firebase features disabled."
-    )
+    logger.debug("serviceAccountKey.json not found; Firebase features disabled.")
     db = None
 
