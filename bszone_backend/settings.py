@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 import os
 import shutil
 from datetime import timedelta
@@ -9,6 +10,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+logger = logging.getLogger(__name__)
 
 
 def load_dotenv(path: Path) -> None:
@@ -242,11 +244,13 @@ if FIREBASE_KEY_PATH.exists():
             firebase_admin.initialize_app(cred)
         # Global Firestore client for backward compatibility
         db = firestore.client()
-        print("Firebase successfully initialized.")
+        logger.info("Firebase initialized.")
     except Exception as e:
-        print(f"Error initializing Firebase: {e}")
+        logger.warning("Error initializing Firebase: %s", e)
         db = None
 else:
-    print("WARNING: serviceAccountKey.json not found in root directory. Firebase features will be disabled.")
+    logger.warning(
+        "serviceAccountKey.json not found; Firebase features disabled."
+    )
     db = None
 
