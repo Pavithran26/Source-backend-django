@@ -1,18 +1,14 @@
 from pathlib import Path
-import logging
 import os
 import shutil
 from datetime import timedelta
 from urllib.parse import urlsplit
 
 import dj_database_url
-import firebase_admin
-from firebase_admin import credentials, firestore
 
-# Vercel imports this module during build: do not emit print() or WARNING-level logs here (probe expects JSON-only stdout).
+# Vercel runs a settings probe that expects JSON on stdout. No print/logging/firebase imports here unless the key exists.
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-logger = logging.getLogger(__name__)
 
 
 def load_dotenv(path: Path) -> None:
@@ -198,9 +194,9 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = []
 
 REST_FRAMEWORK = {
+    # JWT only: session auth + cross-origin SPA can surface CSRF/403; admin still uses Django sessions.
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
@@ -236,23 +232,19 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# --- Firebase Configuration ---
+# --- Firebase (optional): import only if key is present (avoids any firebase/google noise during Vercel build) ---
 FIREBASE_KEY_PATH = BASE_DIR / "serviceAccountKey.json"
+db = None
 
 if FIREBASE_KEY_PATH.exists():
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+
     try:
         if not firebase_admin._apps:
             cred = credentials.Certificate(str(FIREBASE_KEY_PATH))
             firebase_admin.initialize_app(cred)
-        # Global Firestore client for backward compatibility
         db = firestore.client()
-        # Do not log info/warning here: Vercel's build imports settings and expects clean
-        # stdout (no lines starting with WARNING:, etc.) when probing Django configuration.
-        logger.debug("Firebase initialized.")
-    except Exception as e:
-        logger.debug("Error initializing Firebase: %s", e)
+    except Exception:
         db = None
-else:
-    logger.debug("serviceAccountKey.json not found; Firebase features disabled.")
-    db = None
 
