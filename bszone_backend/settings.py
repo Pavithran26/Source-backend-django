@@ -5,6 +5,8 @@ from datetime import timedelta
 from urllib.parse import urlsplit
 
 import dj_database_url
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -102,6 +104,7 @@ CSRF_TRUSTED_ORIGINS = unique(
     + ["http://localhost:3000"]
 )
 CORS_ALLOWED_ORIGINS = unique(frontend_origins + ["http://localhost:3000"])
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
@@ -124,6 +127,7 @@ INSTALLED_APPS = [
     "sales",
     "expenses",
     "core",
+    "inventory",
 ]
 
 MIDDLEWARE = [
@@ -223,4 +227,22 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- Firebase Configuration ---
+FIREBASE_KEY_PATH = BASE_DIR / "serviceAccountKey.json"
+
+if FIREBASE_KEY_PATH.exists():
+    try:
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(str(FIREBASE_KEY_PATH))
+            firebase_admin.initialize_app(cred)
+        # Global Firestore client for backward compatibility
+        db = firestore.client()
+        print("Firebase successfully initialized.")
+    except Exception as e:
+        print(f"Error initializing Firebase: {e}")
+        db = None
+else:
+    print("WARNING: serviceAccountKey.json not found in root directory. Firebase features will be disabled.")
+    db = None
 

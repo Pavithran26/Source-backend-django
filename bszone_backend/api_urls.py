@@ -10,6 +10,7 @@ from sales.views import BuyerViewSet, SalesEntryViewSet
 from users.views import MeAPIView, UserViewSet, WorkspaceTokenObtainPairView
 from vehicle.views import VehicleUsageLogViewSet, VehicleViewSet
 from worklog.views import WorkLogViewSet
+from inventory.views import StoreViewSet, GRNViewSet
 
 router = DefaultRouter(trailing_slash=False)
 router.register("users", UserViewSet, basename="user")
@@ -23,6 +24,8 @@ router.register("worklogs", WorkLogViewSet, basename="worklog")
 router.register("buyers", BuyerViewSet, basename="buyer")
 router.register("sales", SalesEntryViewSet, basename="sales-entry")
 router.register("expenses", ExpenseViewSet, basename="expense")
+router.register("stores", StoreViewSet, basename="store")
+router.register("grns", GRNViewSet, basename="grn")
 
 urlpatterns = [
     path("auth/token", WorkspaceTokenObtainPairView.as_view(), name="token_obtain_pair"),
