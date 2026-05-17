@@ -27,7 +27,59 @@ router.register("expenses", ExpenseViewSet, basename="expense")
 router.register("stores", StoreViewSet, basename="store")
 router.register("grns", GRNViewSet, basename="grn")
 
+from django.http import JsonResponse
+import traceback
+
+def diag_view(request):
+    diag_data = {}
+    
+    # 1. Database Connection check
+    try:
+        from django.db import connection
+        connection.ensure_connection()
+        diag_data["db_connection"] = "SUCCESSFUL"
+        diag_data["db_vendor"] = connection.vendor
+    except Exception as e:
+        diag_data["db_connection"] = "FAILED"
+        diag_data["db_error"] = str(e)
+        diag_data["db_trace"] = traceback.format_exc()
+        
+    # 2. Firebase Env Variable check
+    import os
+    creds_env = os.getenv("FIREBASE_CREDENTIALS")
+    diag_data["firebase_credentials_env_present"] = creds_env is not None
+    if creds_env:
+        diag_data["firebase_credentials_len"] = len(creds_env)
+        try:
+            import json
+            parsed = json.loads(creds_env)
+            diag_data["firebase_json_valid"] = True
+            diag_data["firebase_project_id"] = parsed.get("project_id")
+        except Exception as e:
+            diag_data["firebase_json_valid"] = False
+            diag_data["firebase_json_error"] = str(e)
+            
+    # 3. File existence check
+    from pathlib import Path
+    from django.conf import settings
+    cert_path = Path(settings.BASE_DIR) / "serviceAccountKey.json"
+    diag_data["service_account_file_present"] = cert_path.exists()
+    
+    # 4. Initialize Firebase App test
+    try:
+        from core.firebase_admin import get_firebase_app
+        app = get_firebase_app()
+        diag_data["firebase_app_init"] = "SUCCESSFUL"
+        diag_data["firebase_app_name"] = app.name
+    except Exception as e:
+        diag_data["firebase_app_init"] = "FAILED"
+        diag_data["firebase_error"] = str(e)
+        diag_data["firebase_trace"] = traceback.format_exc()
+        
+    return JsonResponse(diag_data)
+
 urlpatterns = [
+    path("auth/diag", diag_view, name="diag_view"),
     path("auth/token", WorkspaceTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("auth/token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/me", MeAPIView.as_view(), name="auth_me"),
